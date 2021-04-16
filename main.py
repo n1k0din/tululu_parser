@@ -9,12 +9,25 @@ def download_tululu_book(id):
     url = 'https://tululu.org/txt.php'
     params = {'id': id}
 
+    print(f'Downloading {id}...')
+
     response = requests.get(url, params=params, verify=False)
     response.raise_for_status()
 
-    file_path = f'{BOOKS_DIR}{id}.txt'
+    try:
+        check_for_redirect(response)
+    except requests.HTTPError:
+        print(f'Book {id} not found')
+        return
+
+    file_path = f'{BOOKS_DIR}id{id}.txt'
     with open(file_path, 'w') as file:
         file.write(response.text)
+
+
+def check_for_redirect(response):
+    if response.history:
+        raise requests.HTTPError
 
 
 def main():
