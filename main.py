@@ -28,7 +28,7 @@ def download_tululu_book(id):
         text_filename = f'{id}. {book["title"]}.txt'
         # download_txt(text_url, text_filename)
         # download_img(book['img_url'], get_filename(book['img_url']))
-        print(*book['comments'], sep='\n')
+        print(book['title'], book['genres'], sep='\n')
 
 
 def get_tululu_book_text_url(id):
@@ -58,7 +58,7 @@ def get_tululu_book_info(id):
     try:
         author_title = soup.find('div', id='content').find('h1').text
     except AttributeError:
-        print("Can't find title")
+        print("Can't find title. Wrong page?")
         return None
 
     img_src = soup.find('div', class_='bookimage').find('img')['src']
@@ -66,27 +66,31 @@ def get_tululu_book_info(id):
     title, author = [name.strip() for name in author_title.split('::')]
     img_url = urljoin(url, img_src)
 
-    comments = soup.find_all('div', class_='texts')
+    comments_tags = soup.find_all('div', class_='texts')
 
-    comments_texts = [comment.find('span').text for comment in comments]
+    comments = [comment.find('span').text for comment in comments_tags]
+
+    genre_tags = soup.find('span', class_='d_book').find_all('a')
+    genres = [genre_tag.text for genre_tag in genre_tags]
 
     return {
         'author': author,
         'title': title,
         'img_url': img_url,
-        'comments': comments_texts,
+        'comments': comments,
+        'genres': genres,
     }
 
 
 def download_txt(url, filename, folder='books/'):
-    """Функция для скачивания текстовых файлов.
+    '''Функция для скачивания текстовых файлов.
     Args:
         url (str): Cсылка на текст, который хочется скачать.
         filename (str): Имя файла, с которым сохранять.
         folder (str): Папка, куда сохранять.
     Returns:
         str: Путь до файла, куда сохранён текст.
-    """
+    '''
     response = requests.get(url, verify=False)
     response.raise_for_status()
 
@@ -105,14 +109,14 @@ def download_txt(url, filename, folder='books/'):
 
 
 def download_img(url, filename, folder='img/'):
-    """Функция для скачивания изображений.
+    '''Функция для скачивания изображений.
     Args:
         url (str): Cсылка на изображение, которое хочется скачать.
         filename (str): Имя файла, с которым сохранять.
         folder (str): Папка, куда сохранять.
     Returns:
         str: Путь до файла, куда сохранено изображение.
-    """
+    '''
     response = requests.get(url, verify=False)
     response.raise_for_status()
 
