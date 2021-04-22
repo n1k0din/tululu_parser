@@ -20,8 +20,8 @@ def mkdir(*args):
 
 def create_argument_parser():
     parser = argparse.ArgumentParser(description='Download books from tululu.org')
-    parser.add_argument('start_id', type=int, default=1, help='Start book id')
-    parser.add_argument('stop_id', type=int, default=10, help='Stop book id')
+    parser.add_argument('start_id', type=int, help='Start book id')
+    parser.add_argument('stop_id', type=int, help='Stop book id')
 
     return parser
 
@@ -42,16 +42,16 @@ def get_filename_from_url(file_url):
 
 
 def download_tululu_book(id):
-
     book_html = get_tululu_book_html(id)
 
     if book_html:
         book = parse_book_page(book_html)
 
         text_filename = f'{id}. {book["title"]}.txt'
-        download_txt(get_tululu_book_text_url(id), text_filename)
 
-        download_img(book['img_url'], get_filename_from_url(book['img_url']))
+        download_txt(get_tululu_book_text_url(id), text_filename, BOOKS_DIR)
+
+        download_img(book['img_url'], get_filename_from_url(book['img_url']), IMAGES_DIR)
 
 
 def get_tululu_book_text_url(id):
@@ -65,7 +65,7 @@ def check_for_redirect(response):
 
 
 def get_tululu_book_html(id):
-    book_page_path = f'b{id}'
+    book_page_path = f'b{id}/'
     url = urljoin(TULULU_BASE_URL, book_page_path)
 
     response = requests.get(url, verify=False)
@@ -74,6 +74,7 @@ def get_tululu_book_html(id):
     try:
         check_for_redirect(response)
     except requests.HTTPError:
+        print("Error: book not found")
         return
 
     return response.text
@@ -105,7 +106,7 @@ def parse_book_page(html):
     }
 
 
-def download_txt(url, filename, folder='books/'):
+def download_txt(url, filename, folder):
     '''Функция для скачивания текстовых файлов.
     Args:
         url (str): Cсылка на текст, который хочется скачать.
@@ -131,7 +132,7 @@ def download_txt(url, filename, folder='books/'):
     return filepath
 
 
-def download_img(url, filename, folder='img/'):
+def download_img(url, filename, folder):
     '''Функция для скачивания изображений.
     Args:
         url (str): Cсылка на изображение, которое хочется скачать.
