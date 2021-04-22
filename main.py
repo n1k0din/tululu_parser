@@ -3,12 +3,14 @@ import requests
 import urllib3
 from pathlib import Path
 from urllib.parse import urljoin, unquote, urlsplit
+from pprint import pprint
 
 from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filename
 
 BOOKS_DIR = 'books/'
 IMAGES_DIR = 'img/'
+TULULU_BASE_URL = 'https://tululu.org/'
 
 
 def get_filename(file_url):
@@ -21,14 +23,15 @@ def get_filename(file_url):
 
 def download_tululu_book(id):
 
-    book = get_tululu_book_info(id)
+    book_html = get_tululu_book_html(id)
 
-    if book:
+    if book_html:
+        book = parse_book_page(book_html)
         text_url = get_tululu_book_text_url(id)
-        text_filename = f'{id}. {book["title"]}.txt'
+        # text_filename = f'{id}. {book["title"]}.txt'
         # download_txt(text_url, text_filename)
         # download_img(book['img_url'], get_filename(book['img_url']))
-        print(book['title'], book['genres'], sep='\n')
+        pprint(book)
 
 
 def get_tululu_book_text_url(id):
@@ -42,7 +45,7 @@ def check_for_redirect(response):
         raise requests.HTTPError
 
 
-def get_tululu_book_info(id):
+def get_tululu_book_html(id):
     url = f'https://tululu.org/b{id}/'
 
     response = requests.get(url, verify=False)
@@ -53,18 +56,18 @@ def get_tululu_book_info(id):
     except requests.HTTPError:
         return None
 
-    soup = BeautifulSoup(response.text, 'lxml')
+    return response.text
 
-    try:
-        author_title = soup.find('div', id='content').find('h1').text
-    except AttributeError:
-        print("Can't find title. Wrong page?")
-        return None
+
+def parse_book_page(html):
+    soup = BeautifulSoup(html, 'lxml')
+
+    author_title = soup.find('div', id='content').find('h1').text
 
     img_src = soup.find('div', class_='bookimage').find('img')['src']
+    img_url = urljoin(TULULU_BASE_URL, img_src)
 
     title, author = [name.strip() for name in author_title.split('::')]
-    img_url = urljoin(url, img_src)
 
     comments_tags = soup.find_all('div', class_='texts')
 
@@ -76,7 +79,7 @@ def get_tululu_book_info(id):
     return {
         'author': author,
         'title': title,
-        'img_url': img_url,
+        'img_src': img_url,
         'comments': comments,
         'genres': genres,
     }
