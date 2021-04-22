@@ -1,4 +1,5 @@
 import argparse
+import logging
 import os.path
 import urllib3
 from pathlib import Path
@@ -49,6 +50,8 @@ def download_tululu_book(id):
 
         text_filename = f'{id}. {book["title"]}.txt'
 
+        logging.info(f'Downloading {id}: {book["title"]}...')
+
         download_txt(get_tululu_book_text_url(id), text_filename, BOOKS_DIR)
 
         download_img(book['img_url'], get_filename_from_url(book['img_url']), IMAGES_DIR)
@@ -74,7 +77,7 @@ def get_tululu_book_html(id):
     try:
         check_for_redirect(response)
     except requests.HTTPError:
-        print("Error: book not found")
+        logging.warning(f'Book {id} not found')
         return
 
     return response.text
@@ -147,7 +150,7 @@ def download_img(url, filename, folder):
     try:
         check_for_redirect(response)
     except requests.HTTPError:
-        print(f'Img {filename} not found')
+        logging.warning(f'Img {filename} not found')
         return
 
     sanitized_filename = sanitize_filename(filename)
@@ -161,6 +164,13 @@ def download_img(url, filename, folder):
 
 def main():
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+    logging.basicConfig(
+        filename='tululu_parse.log',
+        format='%(asctime)s %(message)s',
+        encoding='utf-8',
+        level=logging.INFO
+    )
+
     mkdir(BOOKS_DIR, IMAGES_DIR)
 
     start_id, stop_id = fetch_from_to_parameters()
