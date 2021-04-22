@@ -1,3 +1,4 @@
+import argparse
 import os.path
 import requests
 import urllib3
@@ -11,6 +12,26 @@ from pathvalidate import sanitize_filename
 BOOKS_DIR = 'books/'
 IMAGES_DIR = 'img/'
 TULULU_BASE_URL = 'https://tululu.org/'
+
+
+def mkdir(*args):
+    for dir_name in args:
+        Path(dir_name).mkdir(parents=True, exist_ok=True)
+
+
+def create_argument_parser():
+    parser = argparse.ArgumentParser(description='Download books from tululu.org')
+    parser.add_argument('--start_id', type=int, default=1, help='Start book id')
+    parser.add_argument('--stop_id', type=int, default=10, help='Stop book id')
+
+    return parser
+
+
+def fetch_from_to_parameters():
+    arg_parser = create_argument_parser()
+    args = arg_parser.parse_args()
+
+    return args.start_id, args.stop_id
 
 
 def get_filename(file_url):
@@ -140,10 +161,11 @@ def download_img(url, filename, folder='img/'):
 
 def main():
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-    Path(BOOKS_DIR).mkdir(parents=True, exist_ok=True)
-    Path(IMAGES_DIR).mkdir(parents=True, exist_ok=True)
+    mkdir(BOOKS_DIR, IMAGES_DIR)
 
-    for id in range(1, 10 + 1):
+    start_id, stop_id = fetch_from_to_parameters()
+
+    for id in range(start_id, stop_id + 1):
         download_tululu_book(id)
 
 
