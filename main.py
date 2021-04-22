@@ -1,11 +1,10 @@
 import argparse
 import os.path
-import requests
 import urllib3
 from pathlib import Path
 from urllib.parse import urljoin, unquote, urlsplit
-from pprint import pprint
 
+import requests
 from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filename
 
@@ -21,8 +20,8 @@ def mkdir(*args):
 
 def create_argument_parser():
     parser = argparse.ArgumentParser(description='Download books from tululu.org')
-    parser.add_argument('--start_id', type=int, default=1, help='Start book id')
-    parser.add_argument('--stop_id', type=int, default=10, help='Stop book id')
+    parser.add_argument('start_id', type=int, default=1, help='Start book id')
+    parser.add_argument('stop_id', type=int, default=10, help='Stop book id')
 
     return parser
 
@@ -34,7 +33,7 @@ def fetch_from_to_parameters():
     return args.start_id, args.stop_id
 
 
-def get_filename(file_url):
+def get_filename_from_url(file_url):
     unquoted_url = unquote(file_url)
     _, _, path, _, _ = urlsplit(unquoted_url)
     _, filename = os.path.split(path)
@@ -48,17 +47,16 @@ def download_tululu_book(id):
 
     if book_html:
         book = parse_book_page(book_html)
-        text_url = get_tululu_book_text_url(id)
-        # text_filename = f'{id}. {book["title"]}.txt'
-        # download_txt(text_url, text_filename)
-        # download_img(book['img_url'], get_filename(book['img_url']))
-        pprint(book)
+
+        text_filename = f'{id}. {book["title"]}.txt'
+        download_txt(get_tululu_book_text_url(id), text_filename)
+
+        download_img(book['img_url'], get_filename_from_url(book['img_url']))
 
 
 def get_tululu_book_text_url(id):
-    url = 'https://tululu.org/'
     download_path = f'txt.php?id={id}'
-    return urljoin(url, download_path)
+    return urljoin(TULULU_BASE_URL, download_path)
 
 
 def check_for_redirect(response):
@@ -67,7 +65,8 @@ def check_for_redirect(response):
 
 
 def get_tululu_book_html(id):
-    url = f'https://tululu.org/b{id}/'
+    book_page_path = f'b{id}'
+    url = urljoin(TULULU_BASE_URL, book_page_path)
 
     response = requests.get(url, verify=False)
     response.raise_for_status()
@@ -75,7 +74,7 @@ def get_tululu_book_html(id):
     try:
         check_for_redirect(response)
     except requests.HTTPError:
-        return None
+        return
 
     return response.text
 
@@ -100,7 +99,7 @@ def parse_book_page(html):
     return {
         'author': author,
         'title': title,
-        'img_src': img_url,
+        'img_url': img_url,
         'comments': comments,
         'genres': genres,
     }
@@ -121,7 +120,7 @@ def download_txt(url, filename, folder='books/'):
     try:
         check_for_redirect(response)
     except requests.HTTPError:
-        return None
+        return
 
     sanitized_filename = sanitize_filename(filename)
     filepath = os.path.join(folder, sanitized_filename)
