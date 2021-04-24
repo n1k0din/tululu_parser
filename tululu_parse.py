@@ -14,11 +14,6 @@ IMAGES_DIR = 'img/'
 TULULU_BASE_URL = 'https://tululu.org/'
 
 
-def mkdir(*args):
-    for dir_name in args:
-        Path(dir_name).mkdir(parents=True, exist_ok=True)
-
-
 def fetch_start_stop_parameters():
     arg_parser = argparse.ArgumentParser(description='Download books from tululu.org')
     arg_parser.add_argument('start_id', type=int, help='Start book id')
@@ -159,7 +154,8 @@ def main():
         level=logging.INFO
     )
 
-    mkdir(BOOKS_DIR, IMAGES_DIR)
+    Path(BOOKS_DIR).mkdir(parents=True, exist_ok=True)
+    Path(IMAGES_DIR).mkdir(parents=True, exist_ok=True)
 
     start_id, stop_id = fetch_start_stop_parameters()
 
