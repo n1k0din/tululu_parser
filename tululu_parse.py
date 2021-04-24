@@ -19,16 +19,11 @@ def mkdir(*args):
         Path(dir_name).mkdir(parents=True, exist_ok=True)
 
 
-def create_argument_parser():
-    parser = argparse.ArgumentParser(description='Download books from tululu.org')
-    parser.add_argument('start_id', type=int, help='Start book id')
-    parser.add_argument('stop_id', type=int, help='Stop book id')
+def fetch_start_stop_parameters():
+    arg_parser = argparse.ArgumentParser(description='Download books from tululu.org')
+    arg_parser.add_argument('start_id', type=int, help='Start book id')
+    arg_parser.add_argument('stop_id', type=int, help='Stop book id')
 
-    return parser
-
-
-def fetch_from_to_parameters():
-    arg_parser = create_argument_parser()
     args = arg_parser.parse_args()
 
     return args.start_id, args.stop_id
@@ -166,7 +161,7 @@ def main():
 
     mkdir(BOOKS_DIR, IMAGES_DIR)
 
-    start_id, stop_id = fetch_from_to_parameters()
+    start_id, stop_id = fetch_start_stop_parameters()
 
     for book_id in range(start_id, stop_id + 1):
         try:
