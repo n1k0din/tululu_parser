@@ -78,11 +78,7 @@ def get_tululu_book_html(id):
     response = requests.get(url, verify=False)
     response.raise_for_status()
 
-    try:
-        check_for_redirect(response)
-    except requests.HTTPError:
-        logging.warning(f'Book {id} not found')
-        return
+    check_for_redirect(response)
 
     return response.text
 
@@ -125,10 +121,7 @@ def download_txt(url, filename, folder, params=None):
     response = requests.get(url, params=params, verify=False)
     response.raise_for_status()
 
-    try:
-        check_for_redirect(response)
-    except requests.HTTPError:
-        return
+    check_for_redirect(response)
 
     sanitized_filename = sanitize_filename(filename)
     filepath = os.path.join(folder, sanitized_filename)
@@ -151,11 +144,7 @@ def download_img(url, filename, folder):
     response = requests.get(url, verify=False)
     response.raise_for_status()
 
-    try:
-        check_for_redirect(response)
-    except requests.HTTPError:
-        logging.warning(f'Img {filename} not found')
-        return
+    check_for_redirect(response)
 
     sanitized_filename = sanitize_filename(filename)
     filepath = os.path.join(folder, sanitized_filename)
@@ -180,7 +169,10 @@ def main():
     start_id, stop_id = fetch_from_to_parameters()
 
     for id in range(start_id, stop_id + 1):
-        download_tululu_book(id)
+        try:
+            download_tululu_book(id)
+        except requests.HTTPError:
+            logging.warning(f'Book {id} not found, skipping...')
 
 
 if __name__ == '__main__':
