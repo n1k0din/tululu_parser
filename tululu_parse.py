@@ -52,14 +52,18 @@ def download_tululu_book(id):
 
         logging.info(f'Downloading {id}: {book["title"]}...')
 
-        download_txt(get_tululu_book_text_url(id), text_filename, BOOKS_DIR)
+        book_txt_url, url_params = get_tululu_book_text_url(id)
+
+        download_txt(book_txt_url, text_filename, BOOKS_DIR, params=url_params)
 
         download_img(book['img_url'], get_filename_from_url(book['img_url']), IMAGES_DIR)
 
 
-def get_tululu_book_text_url(id):
-    download_path = f'txt.php?id={id}'
-    return urljoin(TULULU_BASE_URL, download_path)
+def get_tululu_book_text_url(book_id):
+    download_path = 'txt.php'
+    params = {'id': book_id}
+    url = urljoin(TULULU_BASE_URL, download_path)
+    return url, params
 
 
 def check_for_redirect(response):
@@ -109,7 +113,7 @@ def parse_book_page(html):
     }
 
 
-def download_txt(url, filename, folder):
+def download_txt(url, filename, folder, params=None):
     '''Функция для скачивания текстовых файлов.
     Args:
         url (str): Cсылка на текст, который хочется скачать.
@@ -118,7 +122,7 @@ def download_txt(url, filename, folder):
     Returns:
         str: Путь до файла, куда сохранён текст.
     '''
-    response = requests.get(url, verify=False)
+    response = requests.get(url, params=params, verify=False)
     response.raise_for_status()
 
     try:
