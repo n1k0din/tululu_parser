@@ -42,17 +42,17 @@ def get_filename_from_url(file_url):
     return filename
 
 
-def download_tululu_book(id):
-    book_html = get_tululu_book_html(id)
+def download_tululu_book(book_id):
+    book_html = get_tululu_book_html(book_id)
 
     if book_html:
         book = parse_book_page(book_html)
 
-        text_filename = f'{id}. {book["title"]}.txt'
+        text_filename = f'{book_id}. {book["title"]}.txt'
 
-        logging.info(f'Downloading {id}: {book["title"]}...')
+        logging.info(f'Downloading {book_id}: {book["title"]}...')
 
-        book_txt_url, url_params = get_tululu_book_text_url(id)
+        book_txt_url, url_params = get_tululu_book_text_url(book_id)
 
         download_txt(book_txt_url, text_filename, BOOKS_DIR, params=url_params)
 
@@ -168,11 +168,11 @@ def main():
 
     start_id, stop_id = fetch_from_to_parameters()
 
-    for id in range(start_id, stop_id + 1):
+    for book_id in range(start_id, stop_id + 1):
         try:
-            download_tululu_book(id)
+            download_tululu_book(book_id)
         except requests.HTTPError:
-            logging.warning(f'Book {id} not found, skipping...')
+            logging.warning(f'Book {book_id} not found, skipping...')
 
 
 if __name__ == '__main__':
