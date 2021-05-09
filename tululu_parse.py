@@ -93,18 +93,18 @@ def get_tululu_book_html(id):
 def parse_book_page(html):
     soup = BeautifulSoup(html, 'lxml')
 
-    author_title = soup.find('div', id='content').find('h1').text
+    author_title = soup.select_one('#content h1').text
 
-    img_src = soup.find('div', class_='bookimage').find('img')['src']
+    img_src = soup.select_one('.bookimage img')['src']
     img_url = urljoin(TULULU_BASE_URL, img_src)
 
     title, author = [name.strip() for name in author_title.split('::')]
 
-    comments_tags = soup.find_all('div', class_='texts')
+    comments_tags = soup.select('.texts span')
 
-    comments = [comment.find('span').text for comment in comments_tags]
+    comments = [comment.text for comment in comments_tags]
 
-    genre_tags = soup.find('span', class_='d_book').find_all('a')
+    genre_tags = soup.select('span.d_book a')
     genres = [genre_tag.text for genre_tag in genre_tags]
 
     return {
