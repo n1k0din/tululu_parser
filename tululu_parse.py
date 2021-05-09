@@ -44,9 +44,26 @@ def download_tululu_book(book_id):
 
         book_txt_url, url_params = get_tululu_book_text_url(book_id)
 
-        download_txt(book_txt_url, text_filename, BOOKS_DIR, params=url_params)
+        txt_path = download_txt(
+            book_txt_url,
+            text_filename,
+            BOOKS_DIR,
+            params=url_params,
+        )
 
-        download_img(book['img_url'], get_filename_from_url(book['img_url']), IMAGES_DIR)
+        book['txt_path'] = txt_path
+
+        img_path = download_img(
+            book['img_url'],
+            get_filename_from_url(book['img_url']),
+            IMAGES_DIR,
+        )
+
+        book['img_path'] = img_path
+
+        book.pop('img_url', None)
+
+        return book
 
 
 def get_tululu_book_text_url(book_id):
