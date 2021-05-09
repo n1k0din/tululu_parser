@@ -9,8 +9,8 @@ import requests
 from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filename
 
-BOOKS_DIR = 'books/'
-IMAGES_DIR = 'img/'
+BOOKS_DIR = 'books'
+IMAGES_DIR = 'img'
 TULULU_BASE_URL = 'https://tululu.org/'
 
 
