@@ -1,1 +1,5 @@
 /venv
+/__pycache__
+/books
+img/
+tululu_parse.log
