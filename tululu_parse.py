@@ -32,34 +32,38 @@ def get_filename_from_url(file_url):
     return filename
 
 
-def download_tululu_book(book_id):
+def download_tululu_book(book_id, skip_imgs=False, skip_txts=False, download_dir='.'):
+    texts_download_dir = os.path.join(download_dir, BOOKS_DIR)
+    images_download_dir = os.path.join(download_dir, IMAGES_DIR)
+
     book_html = get_tululu_book_html(book_id)
 
     if book_html:
         book = parse_book_page(book_html)
+        logging.info(f'Processing {book_id}: {book["title"]}...')
 
-        text_filename = f'{book_id}. {book["title"]}.txt'
+        if not skip_txts:
+            text_filename = f'{book_id}. {book["title"]}.txt'
 
-        logging.info(f'Downloading {book_id}: {book["title"]}...')
+            book_txt_url, url_params = get_tululu_book_text_url(book_id)
 
-        book_txt_url, url_params = get_tululu_book_text_url(book_id)
+            txt_path = download_txt(
+                book_txt_url,
+                text_filename,
+                texts_download_dir,
+                params=url_params,
+            )
 
-        txt_path = download_txt(
-            book_txt_url,
-            text_filename,
-            BOOKS_DIR,
-            params=url_params,
-        )
+            book['txt_path'] = txt_path
 
-        book['txt_path'] = txt_path
+        if not skip_imgs:
+            img_path = download_img(
+                book['img_url'],
+                get_filename_from_url(book['img_url']),
+                images_download_dir,
+            )
 
-        img_path = download_img(
-            book['img_url'],
-            get_filename_from_url(book['img_url']),
-            IMAGES_DIR,
-        )
-
-        book['img_path'] = img_path
+            book['img_path'] = img_path
 
         book.pop('img_url', None)
 
