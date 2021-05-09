@@ -1,3 +1,4 @@
+import argparse
 import json
 import logging
 import urllib3
@@ -9,14 +10,34 @@ from bs4 import BeautifulSoup
 import tululu_parse
 
 
+def fetch_start_stop_page_parameters(default_last):
+    arg_parser = argparse.ArgumentParser(description='Download sci-fi books from tululu.org')
+    arg_parser.add_argument('--start_page', type=int, help='Start page num')
+    arg_parser.add_argument('--stop_page', type=int, default=default_last, help='Stop page num')
+
+    args = arg_parser.parse_args()
+
+    return args.start_page, args.stop_page
+
+
 def parse_book_ids_from_category_page(html):
     soup = BeautifulSoup(html, 'lxml')
 
-    book_cards = soup.select('#content .d_book > :nth-child(2) a')
+    book_cards = soup.select('.d_book > :nth-child(2) a')
 
     book_hrefs = (a['href'] for a in book_cards)
 
     yield from (book_id.strip('/').lstrip('b') for book_id in book_hrefs)
+
+
+def get_last_sci_fi_page_num():
+    url = 'https://tululu.org/l55/'
+
+    response = requests.get(url, verify=False)
+    response.raise_for_status()
+
+    soup = BeautifulSoup(response.text, 'lxml')
+    return soup.select('.npage')[-1].text
 
 
 def get_sci_fi_book_ids(page_from=1, page_to=10):
@@ -45,11 +66,15 @@ def main():
 
     metadata_filename = "sci_fi_books.json"
 
+    last_page = get_last_sci_fi_page_num()
+    start_page, stop_page = fetch_start_stop_page_parameters(last_page)
+
+
     with open(metadata_filename, 'w') as f:
         pass
 
     books = []
-    for book_id in get_sci_fi_book_ids(1, 4):
+    for book_id in get_sci_fi_book_ids(start_page, stop_page + 1):
         try:
             book = tululu_parse.download_tululu_book(book_id)
             books.append(book)
