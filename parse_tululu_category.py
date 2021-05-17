@@ -11,25 +11,16 @@ from bs4 import BeautifulSoup
 import tululu_parse
 
 
-def fetch_start_stop_page_parameters(default_last):
+def fetch_cli_parameters(last_page_num):
     arg_parser = argparse.ArgumentParser(description='Download sci-fi books from tululu.org')
-    arg_parser.add_argument('--start_page', type=int, help='Start page num')
-    arg_parser.add_argument('--stop_page', type=int, default=default_last, help='Stop page num')
+    arg_parser.add_argument('--start_page', type=int, default=1, help='Start page num')
+    arg_parser.add_argument('--stop_page', type=int, default=last_page_num, help='Stop page num')
     arg_parser.add_argument('--dest_folder', default='.', help='Download folder')
     arg_parser.add_argument('--skip_imgs', action='store_true', help='Skip cover images download')
     arg_parser.add_argument('--skip_txts', action='store_true', help='Skip book text download')
     arg_parser.add_argument('--json_path', default='sci_fi_books.json', help='Result json path')
 
-    args = arg_parser.parse_args()
-
-    return (
-        args.start_page,
-        args.stop_page,
-        args.dest_folder,
-        args.skip_imgs,
-        args.skip_txts,
-        args.json_path,
-    )
+    return arg_parser.parse_args()
 
 
 def parse_book_ids_from_category_page(html):
@@ -73,28 +64,26 @@ def main():
         level=logging.INFO
     )
 
-    last_page = get_last_sci_fi_page_num()
+    last_page_num = get_last_sci_fi_page_num()
 
-    (
-        start_page,
-        stop_page,
-        dest_folder,
-        skip_imgs,
-        skip_txts,
-        json_path
-    ) = fetch_start_stop_page_parameters(last_page)
+    args = fetch_cli_parameters(last_page_num)
 
-    download_texts_dir = os.path.join(dest_folder, tululu_parse.BOOKS_DIR)
-    download_images_dir = os.path.join(dest_folder, tululu_parse.IMAGES_DIR)
+    download_texts_dir = os.path.join(args.dest_folder, tululu_parse.BOOKS_DIR)
+    download_images_dir = os.path.join(args.dest_folder, tululu_parse.IMAGES_DIR)
     Path(download_texts_dir).mkdir(parents=True, exist_ok=True)
     Path(download_images_dir).mkdir(parents=True, exist_ok=True)
 
-    metadata_filename = os.path.join(dest_folder, json_path)
+    metadata_filename = os.path.join(args.dest_folder, args.json_path)
 
-    for book_id in get_sci_fi_book_ids(start_page, stop_page + 1):
+    for book_id in get_sci_fi_book_ids(args.start_page, args.stop_page + 1):
         try:
-            book = tululu_parse.download_tululu_book(book_id, skip_imgs, skip_txts, dest_folder)
-            with open(metadata_filename, 'w') as f:
+            book = tululu_parse.download_tululu_book(
+                book_id,
+                args.skip_imgs,
+                args.skip_txts,
+                args.dest_folder,
+            )
+            with open(metadata_filename, 'a') as f:
                 json.dump(book, f, ensure_ascii=False)
 
         except requests.HTTPError:
