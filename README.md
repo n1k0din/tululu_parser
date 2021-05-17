@@ -28,9 +28,9 @@
   python parse_tululu_category.py --start_page 5 --stop_page 10
   ```
 
-- Скачивает все фантастические книги, начиная со страницы 690 в папку `download`, пропуская скачивание изображений и текста:
+- Скачивает все фантастические книги, начиная со страницы 690 в папку `download`, пропуская скачивание изображений:
   ```bash
-  python parse_tululu_category.py --start_page 690 --skip_txts --dest_folder download
+  python parse_tululu_category.py --start_page 690 --skip_imgs --dest_folder download
   ```
 
 ## Пример результирующего файла

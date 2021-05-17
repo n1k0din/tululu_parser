@@ -91,13 +91,10 @@ def main():
 
     metadata_filename = os.path.join(dest_folder, json_path)
 
-    with open(metadata_filename, 'w') as f:
-        pass
-
     for book_id in get_sci_fi_book_ids(start_page, stop_page + 1):
         try:
             book = tululu_parse.download_tululu_book(book_id, skip_imgs, skip_txts, dest_folder)
-            with open(metadata_filename, 'a+') as f:
+            with open(metadata_filename, 'w') as f:
                 json.dump(book, f, ensure_ascii=False)
 
         except requests.HTTPError:
