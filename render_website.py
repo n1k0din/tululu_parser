@@ -18,7 +18,7 @@ def fix_path_sep_to_posix(books_metadata: list[dict[str, str]]):
             book['img_path'] = book['img_path'].replace('\\', '/')
 
 
-def build_index(books, dir='.', set_size=10):
+def build_index(books, dir='.', set_size=10, columns_amount=2):
     env = Environment(
         loader=FileSystemLoader('.'),
         autoescape=select_autoescape(['html', 'xml'])
@@ -33,7 +33,7 @@ def build_index(books, dir='.', set_size=10):
         rendered_page = template.render(
             current_page=num,
             pages_amount=pages_amount,
-            books=chunked(books_set, 2),
+            books=chunked(books_set, columns_amount),
         )
         filename = filename_temlate.format(num)
         full_path = os.path.join(dir, filename)
