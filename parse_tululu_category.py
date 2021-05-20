@@ -75,6 +75,8 @@ def main():
 
     metadata_filename = os.path.join(args.dest_folder, args.json_path)
 
+    books_metadata = []
+
     for book_id in get_sci_fi_book_ids(args.start_page, args.stop_page + 1):
         try:
             book = tululu_parse.download_tululu_book(
@@ -83,11 +85,14 @@ def main():
                 args.skip_txts,
                 args.dest_folder,
             )
-            with open(metadata_filename, 'a') as f:
-                json.dump(book, f, ensure_ascii=False)
+
+            books_metadata.append(book)
 
         except requests.HTTPError:
             logging.warning(f'Book {book_id} not found, skipping...')
+
+    with open(metadata_filename, 'w') as f:
+        json.dump(books_metadata, f, ensure_ascii=False)
 
     logging.info('Done!')
 
