@@ -1,3 +1,4 @@
+import argparse
 import json
 import os
 from functools import partial
@@ -9,6 +10,14 @@ from livereload import Server
 from more_itertools import chunked
 
 PAGES_DIR = 'pages'
+
+
+def fetch_cli_parameters():
+    arg_parser = argparse.ArgumentParser(description='Render json with tululu books to html pages')
+    arg_parser.add_argument('--template', default='template.html', help='Jinja2 template file')
+    arg_parser.add_argument('--json', default='sci_fi_books.json', help='Input json filename')
+
+    return arg_parser.parse_args()
 
 
 def fix_path_sep_to_posix(books_metadata: list[dict[str, str]]):
@@ -43,8 +52,12 @@ def build_index(books, dir='.', set_size=10, columns_amount=2):
 
 
 def main():
+    args = fetch_cli_parameters()
+    json_filename = args.json
+    template_filename = args.template
+
     os.makedirs(PAGES_DIR, exist_ok=True)
-    with open('sci_fi_books.json') as f:
+    with open(json_filename) as f:
         books_metadata = json.load(f)
 
     fix_path_sep_to_posix(books_metadata)
@@ -53,7 +66,7 @@ def main():
 
     rebuild()
     server = Server()
-    server.watch('template.html', rebuild)
+    server.watch(template_filename, rebuild)
     server.serve(root='.')
 
 
