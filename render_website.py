@@ -1,6 +1,7 @@
 import json
 import os
 from functools import partial
+from math import ceil
 
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -25,10 +26,13 @@ def build_index(books, dir='.', set_size=10):
 
     template = env.get_template('template.html')
 
+    pages_amount = ceil(len(books) / set_size)
     filename_temlate = 'index{}.html'
     for num, books_set in enumerate(chunked(books, set_size), start=1):
 
         rendered_page = template.render(
+            current_page=num,
+            pages_amount=pages_amount,
             books=chunked(books_set, 2),
         )
         filename = filename_temlate.format(num)
