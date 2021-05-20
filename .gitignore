@@ -1,7 +1,9 @@
 /venv
 /__pycache__
 /books
+/download
 img/
+index.html
 tululu_parse.log
 tululu_category_parse.log
 sci_fi_books.json
