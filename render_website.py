@@ -5,6 +5,7 @@ from functools import partial
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from livereload import Server
+from more_itertools import chunked
 
 
 def fix_path_sep_to_posix(books_metadata: list[dict[str, str]]):
@@ -23,7 +24,7 @@ def build_index(books):
     template = env.get_template('template.html')
 
     rendered_page = template.render(
-        books=books,
+        books=chunked(books, 2),
     )
 
     with open('index.html', 'w', encoding='utf8') as file:
