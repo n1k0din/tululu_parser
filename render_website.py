@@ -4,7 +4,6 @@ import os
 from functools import partial
 from math import ceil
 
-
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from livereload import Server
 from more_itertools import chunked
@@ -36,7 +35,7 @@ def build_index(books, dir='.', set_size=10, columns_amount=2):
     template = env.get_template('template.html')
 
     pages_amount = ceil(len(books) / set_size)
-    filename_temlate = 'index{}.html'
+    filename_template = 'index{}.html'
     for num, books_set in enumerate(chunked(books, set_size), start=1):
 
         rendered_page = template.render(
@@ -44,7 +43,7 @@ def build_index(books, dir='.', set_size=10, columns_amount=2):
             pages_amount=pages_amount,
             books=chunked(books_set, columns_amount),
         )
-        filename = filename_temlate.format(num)
+        filename = filename_template.format(num)
         full_path = os.path.join(dir, filename)
 
         with open(full_path, 'w', encoding='utf8') as file:
