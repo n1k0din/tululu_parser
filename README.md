@@ -1,4 +1,6 @@
 # Скачивание книг с tululu.org
+[Онлайн-демо](https://n1k0din.github.io/tululu_parser/pages/index1.html)
+
 ## Как скачать и пользоваться офлайн-библиотекой
 1. [Скачать актуальный архив](https://github.com/n1k0din/tululu_parser/archive/refs/heads/master.zip).
 
@@ -12,7 +14,7 @@
   - Открыть `index1.html`.
   ![Как открыть библиотеку](screenshots/howto_open.png "IE не лучший выбор")
   - Наслаждаться коллекцией.
-  
+
 ## Скрипты
 - `tululu_parse.py` скачивает книги по id c tululu, текст и изображения обложек складывает в media/books/ и media/img/, данные о книгах хранит во внутреннем словаре. Пишет логи скачивания в `tululu_parse.log`.
 
